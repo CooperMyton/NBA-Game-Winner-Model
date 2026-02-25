@@ -32,8 +32,71 @@ df = games.merge(
     suffixes=("", "_adv")
 )
 
+#define target, bad and good features
+target = "win"
+leakage_cols = [
+    "win_adv", "wl",
+    "teamScore", "opponentScore", "plusMinusPoints",
+    "q1Points", "q2Points", "q3Points", "q4Points",
+    "benchPoints", "biggestLead", "biggestScoringRun",
+    "leadChanges", "timesTied",
+    "pointsFastBreak", "pointsFromTurnovers",
+    "pointsInThePaint", "pointsSecondChance",
+    "timeoutsRemaining",
+    "numMinutes", "min", "poss",
+    "gameDate", "gameDateTimeEst_adv",
+    "matchup"
+]
+junk_cols = [
+    "coachId",
+    "teamCity_adv", "teamName_adv",
+    "opponentTeamCity_adv", "opponentTeamName_adv",
+    "teamName_right",
+    "home_adv"
+]
+id_cols = [
+    "gameId",
+    "teamCity", "teamName",
+    "opponentTeamCity", "opponentTeamName",
+    "opponentTeamId",
+    "teamAbbreviation"
+]
+#drop bad ones
+df = df.drop(columns=leakage_cols + junk_cols + id_cols)
+
+#Create rolling stats for analysis
+rolling_stats = [
+    "assists", "reboundsTotal", "turnovers",
+    "fieldGoalsPercentage", "threePointersPercentage",
+    "freeThrowsPercentage",
+    "offRating", "defRating", "netRating",
+    "pace", "tsPct"
+]
+df = df.sort_values("gameDateTimeEst")
+for stat in rolling_stats:
+    df[f"{stat}_last5"] = (
+        df.groupby("teamId")[stat].transform(lambda x: x.shift(1).rolling(5).mean())
+    )
+    
+#remove pergame stats
+raw_game_stats = [
+    "assists", "blocks", "steals",
+    "fieldGoalsAttempted", "fieldGoalsMade", "fieldGoalsPercentage",
+    "threePointersAttempted", "threePointersMade", "threePointersPercentage",
+    "freeThrowsAttempted", "freeThrowsMade", "freeThrowsPercentage",
+    "reboundsDefensive", "reboundsOffensive", "reboundsTotal",
+    "foulsPersonal", "turnovers",
+    "astPct", "astRatio", "astTo",
+    "defRating", "drebPct", "eDefRating", "eNetRating", "eOffRating",
+    "ePace", "efgPct", "netRating", "offRating",
+    "orebPct", "pace", "pacePer40", "pie", "rebPct", "tmTovPct", "tsPct"
+]
+df = df.drop(columns= raw_game_stats)
+df = df.dropna() #get rid of any row with NA attribute
 
 #Sanity checks
+#print(df[[f"{s}_last5" for s in rolling_stats]].head(10))
+print(df.isna().sum().sum())
 print(len(df))
 print(df.columns)
 #print(games.duplicated(subset={"gameId", "teamId"}).sum())
