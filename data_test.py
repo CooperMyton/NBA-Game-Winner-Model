@@ -1,6 +1,8 @@
 #trying to get kaggle dataset to interact
 import pandas as pd
 import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
 
 #List of attributes which are unnecessary
 COLS_TO_DELETE = ["gameId", "teamID", "opponentTeamId", "coachId", "timeoutsRemaining", "timesTied"]
@@ -64,6 +66,10 @@ id_cols = [
 #drop bad ones
 df = df.drop(columns=leakage_cols + junk_cols + id_cols)
 
+#Drop preseason
+df = df[df["gameType"] == "Regular Season"]
+df = df.drop(columns=["gameType"])
+
 #Create rolling stats for analysis
 rolling_stats = [
     "assists", "reboundsTotal", "turnovers",
@@ -94,11 +100,33 @@ raw_game_stats = [
 df = df.drop(columns= raw_game_stats)
 df = df.dropna() #get rid of any row with NA attribute
 
+#Time based training
+df = df.sort_values("gameDateTimeEst")
+split_idx = int(len(df) * 0.8)
+
+train_df = df.iloc[:split_idx]
+test_df = df.iloc[split_idx:]
+
+X_train = train_df.drop(columns = ["win", "gameDateTimeEst", "teamId"])
+y_train = train_df["win"]
+
+X_test = test_df.drop(columns = ["win", "gameDateTimeEst", "teamId"])
+y_test = test_df["win"]
+
+
+#First model
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+
+preds = model.predict(X_test)
+acc = accuracy_score(y_test, preds)
+print(F"Test accuracy: {acc:.3f}")
+
 #Sanity checks
 #print(df[[f"{s}_last5" for s in rolling_stats]].head(10))
-print(df.isna().sum().sum())
-print(len(df))
-print(df.columns)
+#print(df.isna().sum().sum())
+#print(len(df))
+#print(df.columns)
 #print(games.duplicated(subset={"gameId", "teamId"}).sum())
 #print(advanced.duplicated(subset=["gameId", "teamId"]).sum())
 #print(games["gameDateTimeEst"].min(), games["gameDateTimeEst"].max())
