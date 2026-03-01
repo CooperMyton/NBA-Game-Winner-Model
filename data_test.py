@@ -84,6 +84,46 @@ for stat in rolling_stats:
         df.groupby("teamId")[stat].transform(lambda x: x.shift(1).rolling(5).mean())
     )
     
+#make comparative stats between opponent
+rolling_cols = [
+    "assists_last5",
+    "reboundsTotal_last5",
+    "turnovers_last5",
+    "fieldGoalsPercentage_last5",
+    "threePointersPercentage_last5",
+    "freeThrowsPercentage_last5",
+    "offRating_last5",
+    "defRating_last5",
+    "netRating_last5",
+    "pace_last5",
+    "tsPct_last5"
+]
+
+opponent_df = df[["gameDateTimeEst", "teamId"] + rolling_cols].copy()
+
+opponent_df = opponent_df.rename(columns={
+    "teamId": "opponentTeamId_adv"
+})
+
+for col in rolling_cols:
+    opponent_df = opponent_df.rename(columns={col: col + "_opp"})
+
+#merge it
+df = df.merge(
+    opponent_df,
+    on=["gameDateTimeEst", "opponentTeamId_adv"],
+    how="left"
+)
+
+#create difference features
+for col in rolling_cols:
+    df[col + "_diff"] = df[col] - df[col + "_opp"]
+
+
+#clean to only have diff stats
+cols_to_drop = rolling_cols + [c + "_opp" for c in rolling_cols]
+df = df.drop(columns=cols_to_drop)
+
 #remove pergame stats
 raw_game_stats = [
     "assists", "blocks", "steals",
@@ -121,6 +161,10 @@ model.fit(X_train, y_train)
 preds = model.predict(X_test)
 acc = accuracy_score(y_test, preds)
 print(F"Test accuracy: {acc:.3f}")
+print("Test accuracy:", model.score(X_test, y_test))
+
+
+
 
 #Sanity checks
 #print(df[[f"{s}_last5" for s in rolling_stats]].head(10))
