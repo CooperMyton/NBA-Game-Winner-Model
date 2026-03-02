@@ -3,14 +3,15 @@ import pandas as pd
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
 
 #List of attributes which are unnecessary
 COLS_TO_DELETE = ["gameId", "teamID", "opponentTeamId", "coachId", "timeoutsRemaining", "timesTied"]
 
 start_date = pd.Timestamp("2023-10-01")
 
-games = pd.read_csv('TeamStatistics.csv')
-advanced = pd.read_csv('TeamStatisticsAdvanced.csv')
+games = pd.read_csv('data/raw/TeamStatistics.csv')
+advanced = pd.read_csv('data/raw/TeamStatisticsAdvanced.csv')
 
 #Converting Dates and sorting
 games["gameDateTimeEst"] = pd.to_datetime(games["gameDateTimeEst"])
@@ -140,6 +141,7 @@ raw_game_stats = [
 df = df.drop(columns= raw_game_stats)
 df = df.dropna() #get rid of any row with NA attribute
 
+
 #Time based training
 df = df.sort_values("gameDateTimeEst")
 split_idx = int(len(df) * 0.8)
@@ -152,6 +154,11 @@ y_train = train_df["win"]
 
 X_test = test_df.drop(columns = ["win", "gameDateTimeEst", "teamId"])
 y_test = test_df["win"]
+
+# scale features 
+#scaler = StandardScaler()
+#X_train = scaler.fit_transform(X_train)
+#X_test = scaler.transform(X_test)
 
 
 #First model
