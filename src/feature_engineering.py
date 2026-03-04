@@ -25,8 +25,8 @@ junk_cols = [
     "home_adv"
 ]
 
+#taking gameId out for tree model
 id_cols = [
-    "gameId",
     "teamCity", "teamName",
     "opponentTeamCity", "opponentTeamName",
     "opponentTeamId",
