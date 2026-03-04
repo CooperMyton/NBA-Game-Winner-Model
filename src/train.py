@@ -11,6 +11,10 @@ from src.models import get_logistic
 
 import pandas as pd
 
+import joblib
+
+import os
+
 start_date = pd.Timestamp("2023-10-01")
 
 df = load_and_merge("data/raw/TeamStatistics.csv", "data/raw/TeamStatisticsAdvanced.csv", start_date)
@@ -35,3 +39,8 @@ model = get_logistic()
 model.fit(X_train, y_train)
 
 print("Accuracy:", model.score(X_test, y_test))
+
+#save and dump model
+os.makedirs("models", exist_ok=True)
+joblib.dump(model, "models/logistic_model.pkl")
+print("model saved to models/logistic_model.pkl")
