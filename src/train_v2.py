@@ -29,8 +29,6 @@ drop_cols = [
 ]
 
 X_train = train_df.drop(columns=drop_cols)
-print(df.columns)
-exit()
 y_train = train_df["home_win"]
 
 X_test = test_df.drop(columns=drop_cols)
