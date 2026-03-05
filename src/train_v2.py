@@ -5,7 +5,7 @@ import pandas as pd
 import joblib
 import os
 
-df = build_matchup_dataset(window=5)
+df = build_matchup_dataset(window=13)
 #print(df.columns)
 #exit()
 
@@ -30,20 +30,25 @@ drop_cols = [
 
 X_train = train_df.drop(columns=drop_cols)
 y_train = train_df["home_win"]
+#print("Feature count:", len(X_train.columns))
+#print("Rows:", len(X_train))
 
 X_test = test_df.drop(columns=drop_cols)
 y_test = test_df["home_win"]
 
 model = XGBClassifier(
-    n_estimators=300,
-    max_depth=4,
-    learning_rate=0.05,
+    n_estimators=500,
+    max_depth=6,
+    learning_rate=0.03,
+    subsample=0.8,
+    colsample_bytree=0.8,
     random_state=42
 )
 
 model.fit(X_train, y_train)
 
 print("New Model Accuracy:", model.score(X_test, y_test))
+#print(train_df["home_win"].value_counts())
 
 os.makedirs("models", exist_ok=True)
 joblib.dump(model, "models/xgb_model.pkl")

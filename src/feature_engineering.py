@@ -83,7 +83,7 @@ def clean_columns(df):
 #rolling features for n games
 def add_rolling_features(df, window=5):
     df = df.sort_values("gameDateTimeEst")
-
+    
     rolling_stats = [
         "assists", "reboundsTotal", "turnovers",
         "fieldGoalsPercentage", "threePointersPercentage",
@@ -97,6 +97,11 @@ def add_rolling_features(df, window=5):
             df.groupby("teamId")[stat]
               .transform(lambda x: x.shift(1).rolling(window).mean())
         )
+        df[f"win_last{window}"] = (
+            df.groupby("teamId")["win"]
+            .transform(lambda x: x.shift(1).rolling(window).mean())
+        )
+
 
     return df
 

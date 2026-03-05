@@ -23,7 +23,7 @@ def build_matchup_dataset(window=5):
     df = finalize_dataset(df)
 
     # Keep only rolling features + identifiers
-    rolling_cols = [c for c in df.columns if "_last5" in c]
+    rolling_cols = [c for c in df.columns if f"_last{window}" in c]
 
     keep_cols = ["gameId", "teamId", "home", "win", "gameDateTimeEst"] + rolling_cols
     df = df[keep_cols]
