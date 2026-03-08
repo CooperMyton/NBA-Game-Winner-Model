@@ -106,7 +106,9 @@ def build_matchup_dataset(start_date=DEFAULT_START_DATE):
 
         game_data["season_win_pct_diff"] = home_team["season_win_pct"] - away_team["season_win_pct"]
         game_data["elo_diff"] = home_team["elo"] - away_team["elo"]
+        game_data["game_id"] = game_id 
         game_data["home_win"] = int(home_team["win"])
+        
 
 
         games.append(game_data)

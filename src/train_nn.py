@@ -13,7 +13,7 @@ import os
 
 df = build_matchup_dataset(start_date=pd.Timestamp("2020-10-01"))
 
-X = df.drop(columns=["home_win"])
+X = df.drop(columns=["home_win", "game_id"])
 y = df["home_win"]
 
 #from sklearn.ensemble import RandomForestClassifier
