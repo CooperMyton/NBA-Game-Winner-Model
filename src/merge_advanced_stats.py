@@ -56,7 +56,8 @@ new_df = new_df[~new_df.apply(lambda r: (r["gameId"], r["teamId"]) in existing_i
 print(f"Adding {len(new_df)} new rows to existing {len(existing)}")
 
 merged = pd.concat([existing, new_df], ignore_index=True)
+merged["gameDateTimeEst"] = pd.to_datetime(merged["gameDateTimeEst"], errors="coerce")
 merged = merged.sort_values("gameDateTimeEst")
 
-merged.to_csv("data/raw/TeamStatisticsAdvanced.csv", index=False)
+merged.to_csv("data/raw/TeamStatisticsAdvanced_nn.csv", index=False)
 print(f"Done. Total rows: {len(merged)}")
